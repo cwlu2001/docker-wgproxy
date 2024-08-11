@@ -1,0 +1,14 @@
+services:
+  wgproxy:
+    image: cwlu2001/docker-wgproxy:dev
+    container_name: wgproxy
+    restart: unless-stopped
+    ports:
+      - 8888:8888/tcp
+    volumes:
+      - ./wg0.conf:/etc/wireguard/wg0.conf:ro
+    cap_add:
+      - NET_ADMIN
+    sysctls:
+      - net.ipv4.ip_forward=1
+      - net.ipv4.conf.all.src_valid_mark=1
