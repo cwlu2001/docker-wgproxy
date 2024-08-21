@@ -4,9 +4,10 @@ services:
     container_name: wgproxy
     restart: unless-stopped
     ports:
-      - 8888:8888/tcp
+      - 18888:18888/tcp
     volumes:
       - ./wg0.conf:/etc/wireguard/wg0.conf:ro
+      - ./config:/config # Optional, makes you able to edit proxy settings
     cap_add:
       - NET_ADMIN
     sysctls:
