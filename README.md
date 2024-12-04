@@ -13,17 +13,27 @@ wgproxy is a self-hosted proxy server using WireGuard VPN as upstream server
 Rename your WireGuard config file to `wg0.conf` and place into `path_to_config/`
 
 ### Tinyproxy
-Default setting will generated automatically in `path_to_config/` in first time start
+Default setting will generated automatically in `path_to_config/` in first run
 
-Customize proxy settings? [Link](https://tinyproxy.github.io/)
+[Customize proxy settings](https://tinyproxy.github.io/)
 
 ## Start
-via `docker compose`
-
-Use the following command with [compose.yaml](https://github.com/cwlu2001/docker-wgproxy/blob/main/compose.yaml)
-
-```bash
-docker compose up -d
+docker compose
+```yaml
+services:
+  wgproxy:
+    image: cwlu2001/docker-wgproxy:latest
+    container_name: wgproxy
+    restart: unless-stopped
+    ports:
+      - 18888:18888/tcp
+    volumes:
+      - path_to_config/:/config
+    cap_add:
+      - NET_ADMIN
+    sysctls:
+      - net.ipv4.ip_forward=1
+      - net.ipv4.conf.all.src_valid_mark=1
 ```
 
 ## Links

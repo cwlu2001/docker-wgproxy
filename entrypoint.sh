@@ -24,7 +24,7 @@ __start_wg() {
     fi
     wg-quick up $WIREGUARD_INTERFACE
     ip rule add from $LOCAL_IP_ADDRESS lookup main
-    ping -4 -c 2 -W 2 8.8.8.8 > /dev/null
+    ping -4 -c 2 -W 2 1.1.1.1 > /dev/null
     wg
 }
 
