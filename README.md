@@ -22,7 +22,7 @@ docker compose
 ```yaml
 services:
   wgproxy:
-    image: cwlu2001/docker-wgproxy:latest
+    image: cwlu2001/wgproxy:latest
     container_name: wgproxy
     restart: unless-stopped
     ports:
