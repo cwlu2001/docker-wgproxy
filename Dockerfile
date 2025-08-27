@@ -1,4 +1,4 @@
-FROM alpine:3.20 AS build
+FROM alpine:3.22 AS build
 RUN apk add --no-cache \
     dumb-init wireguard-tools iptables tinyproxy
 RUN sed -i 's|\[\[ $proto == -4 \]\] && cmd sysctl -q net\.ipv4\.conf\.all\.src_valid_mark=1|[[ $proto == -4 ]] \&\& [[ $(sysctl -n net.ipv4.conf.all.src_valid_mark) != 1 ]] \&\& cmd sysctl -q net.ipv4.conf.all.src_valid_mark=1|' /usr/bin/wg-quick
