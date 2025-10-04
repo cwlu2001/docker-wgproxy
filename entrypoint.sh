@@ -1,12 +1,11 @@
 #!/bin/sh
 
-LOCAL_IP_ADDRESS=$(ip route get 1.1.1.1 | sed -n 's|.*src \([0-9.]\+\).*|\1|p')
-WIREGUARD_INTERFACE=${WIREGUARD_INTERFACE}
-WIREGUARD_SYSTEM_CONFIG_FILE=/etc/wireguard/$WIREGUARD_INTERFACE.conf
-WIREGUARD_USER_CONFIG_FILE=/config/$WIREGUARD_INTERFACE.conf
-PROXY_SYSTEM_CONFIG_FILE=/etc/tinyproxy/tinyproxy.conf
-PROXY_USER_CONFIG_FILE=/config/tinyproxy.conf
-PROXY_PID=""
+LOCAL_IP=$(hostname -i)
+WIREGUARD_IMPLT=${WIREGUARD_IMPLT:-wireguard}
+WIREGUARD_INTF=wg0
+WIREGUARD_CFG=/config/$WIREGUARD_INTF.conf
+HTTP=${HTTP:-false}
+SOCKS=${SOCKS:-true}
 
 __echo() {
     YELLOW="\033[1;33m"
@@ -15,40 +14,46 @@ __echo() {
 }
 
 __start_wg() {
-    __echo Starting Wireguard
-    if  [ ! -f $WIREGUARD_SYSTEM_CONFIG_FILE ] && [ ! -f $WIREGUARD_USER_CONFIG_FILE ]; then
+    __echo Starting $WIREGUARD_IMPLT
+    if [[ ! -f $WIREGUARD_CFG ]]; then
         __echo No Wireguard config dected, terminating ...
-        exit 0
-    elif [ ! -f $WIREGUARD_SYSTEM_CONFIG_FILE ] ; then
-        ln -s $WIREGUARD_USER_CONFIG_FILE $WIREGUARD_SYSTEM_CONFIG_FILE
+        exit 1
     fi
-    wg-quick up $WIREGUARD_INTERFACE
-    ip rule add from $LOCAL_IP_ADDRESS lookup main
-    ping -4 -c 2 -W 2 1.1.1.1 > /dev/null
-    wg
+    case "$WIREGUARD_IMPLT" in
+        wireguard)
+            wg-quick up $WIREGUARD_INTF
+        ;;
+        amnezia)
+            awg-quick up $WIREGUARD_INTF
+        ;;
+    esac
+    ip rule add from $LOCAL_IP lookup main
 }
-
-__start_tp() {
-    __echo Starting Tinyproxy
-    if [ ! -f $PROXY_SYSTEM_CONFIG_FILE ]; then
-        if  [ -f $PROXY_USER_CONFIG_FILE ]; then
-            __echo Using user defined config
-        else
-            __echo No config dected, using default ...
-            PROXY_USER_CONFIG_FILE=/default-config/tinyproxy.conf
-        fi
-        ln -s $PROXY_USER_CONFIG_FILE $PROXY_SYSTEM_CONFIG_FILE
-    fi
-    tinyproxy -d
-}
-
 __stop_wg() {
-    __echo Stopping Wireguard
-    wg-quick down $WIREGUARD_INTERFACE > /dev/null 2>&1
-    ip rule delete from $LOCAL_IP_ADDRESS lookup main
+    __echo Stopping $WIREGUARD_IMPLT
+    case "$WIREGUARD_IMPLT" in
+        wireguard)
+            wg-quick up $WIREGUARD_INTF > /dev/null 2>&1
+        ;;
+        amnezia)
+            awg-quick down $WIREGUARD_INTF > /dev/null 2>&1
+        ;;
+    esac
+    ip rule delete from $LOCAL_IP lookup main
 }
 
+__start_proxy() {
+    if [[ "$HTTP" == "true" ]]; then
+        __echo Starting HTTP proxy
+        tinyproxy -d -c /config/tinyproxy.conf &
+    fi
+    if [[ "$SOCKS" == "true" ]]; then
+        __echo Starting SOCKS proxy
+        sockd -f /config/sockd.conf &
+    fi
+}
 
 trap __stop_wg SIGTERM SIGINT
 __start_wg
-__start_tp
+__start_proxy
+sleep infinity

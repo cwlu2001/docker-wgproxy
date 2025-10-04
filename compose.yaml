@@ -1,0 +1,22 @@
+services:
+  wgproxy:
+    image: cwlu2001/wgproxy:latest
+    container_name: wgproxy
+    restart: unless-stopped
+    ports:
+      - 1080:1080     # SOCKS
+      - 1080:1080/udp # SOCKS
+#      - 8888:8888     # HTTP
+    volumes:
+      - path_to_cfg_file:/config/wg0.conf:ro
+    environment:
+      - WIREGUARD_IMPLT= # Optional
+      - HTTP= # Optional
+      - SOCKS= # Optional
+    cap_add:
+      - NET_ADMIN
+    sysctls:
+      - net.ipv4.ip_forward=1
+      - net.ipv4.conf.all.src_valid_mark=1
+    devices:
+      - /dev/net/tun
