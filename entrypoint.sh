@@ -1,7 +1,7 @@
 #!/bin/sh
 
 LOCAL_IP=$(hostname -i)
-WIREGUARD_IMPLT=${WIREGUARD_IMPLT:-wireguard}
+WIREGUARD_IMPLT=${WIREGUARD:-wireguard}
 WIREGUARD_INTF=wg0
 WIREGUARD_CFG=/config/$WIREGUARD_INTF.conf
 HTTP=${HTTP:-false}
@@ -23,7 +23,7 @@ __start_wg() {
         wireguard)
             wg-quick up $WIREGUARD_INTF
         ;;
-        amnezia)
+        amneziawg)
             awg-quick up $WIREGUARD_INTF
         ;;
     esac
@@ -35,7 +35,7 @@ __stop_wg() {
         wireguard)
             wg-quick up $WIREGUARD_INTF > /dev/null 2>&1
         ;;
-        amnezia)
+        amneziawg)
             awg-quick down $WIREGUARD_INTF > /dev/null 2>&1
         ;;
     esac

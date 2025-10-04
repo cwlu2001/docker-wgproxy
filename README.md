@@ -6,16 +6,16 @@
 [docker_image_size]: https://img.shields.io/docker/image-size/cwlu2001/wgproxy?logo=docker
 
 
-wgproxy is a self-hosted proxy server using WireGuard VPN as upstream server
+wgproxy is a HTTP/SOCKS + WireGuard/AmneziaWG proxy server
 
 ## Configuration
-### Wireguard
-Rename your WireGuard config file to `wg0.conf` and place into `path_to_config/`
+### Proxy
+#### [Tinyproxy](https://tinyproxy.github.io/)
+Mount point: `/config/tinyproxy.conf`
 
-### Tinyproxy
-Default setting will generated automatically in `path_to_config/` in first run
+#### [Dante](https://www.inet.no/dante/doc/1.4.x/config/index.html)
+Mount point: `/config/sockd.conf`
 
-[Customize proxy settings](https://tinyproxy.github.io/)
 
 ## Start
 docker compose
@@ -26,15 +26,27 @@ services:
     container_name: wgproxy
     restart: unless-stopped
     ports:
-      - 18888:18888/tcp
+      - 1080:1080     # SOCKS
+      - 1080:1080/udp # SOCKS
+#      - 8888:8888     # HTTP
     volumes:
-      - path_to_config/:/config
+      - path_to_cfg_file:/config/wg0.conf:ro
     cap_add:
       - NET_ADMIN
     sysctls:
       - net.ipv4.ip_forward=1
       - net.ipv4.conf.all.src_valid_mark=1
+    devices:
+      - /dev/net/tun
+
 ```
+
+## Options
+| Variable | Default | Options | Description |
+| --- | --- | --- | --- |
+| `WIREGUARD` | `wireguard` | `wireguard`, `amneziawg` | Wireguard implementation to use |
+| `HTTP` | `false` | `true`, `false` | Enable HTTP proxy |
+| `SOCKS` | `true` | `true`, `false` | Enable SOCKS proxy |
 
 ## Links
 + [Source](https://github.com/cwlu2001/docker-wgproxy)
