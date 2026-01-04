@@ -1,0 +1,9 @@
+#!/usr/bin/with-contenv bash
+if [[ $SOCKS -eq 0 ]]; then
+    tail -f /dev/null
+    exit
+fi
+if [[ $WG_NESTED -eq 1 ]]; then
+    sed -i 's/wg0/wg1/' /etc/sockd.conf
+fi
+sockd -f /etc/sockd.conf

@@ -1,0 +1,6 @@
+#!/usr/bin/with-contenv bash
+if [[ $HTTP -eq 0 ]]; then
+    tail -f /dev/null
+    exit
+fi
+tinyproxy -d -c /etc/tinyproxy/tinyproxy.conf

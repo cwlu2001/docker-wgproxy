@@ -1,0 +1,12 @@
+#!/usr/bin/with-contenv bash
+ip route flush table 100
+ip route flush table 200
+
+ip rule delete add not fwmark 200 table 200
+ip rule delete add fwmark 200 table 100
+ip rule delete add fwmark 100 table main
+ip rule delete add table main suppress_prefixlength 0
+ip rule delete add from $(hostname -i) lookup main
+
+wg-quick down wg1
+wg-quick down wg0

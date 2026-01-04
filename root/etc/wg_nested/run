@@ -1,0 +1,15 @@
+#!/usr/bin/with-contenv bash
+wg-quick up wg0
+wg set wg0 fwmark 100
+wg-quick up wg1
+wg set wg1 fwmark 200
+wg
+
+ip route add default dev wg0 table 100
+ip route add default dev wg1 table 200
+
+ip rule add not fwmark 200 table 200
+ip rule add fwmark 200 table 100
+ip rule add fwmark 100 table main
+ip rule add table main suppress_prefixlength 0
+ip rule add from $(hostname -i) lookup main

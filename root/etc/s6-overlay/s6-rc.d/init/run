@@ -1,0 +1,25 @@
+#!/usr/bin/with-contenv bash
+WG0_CFG=/etc/wireguard/wg0.conf
+cp -f /config/wg0.conf $WG0_CFG
+
+if [[ $WG_NESTED -eq 1 ]]; then
+    SERVICE_ROOT=/etc/s6-overlay/s6-rc.d
+    ln -sf /etc/wg_nested/run $SERVICE_ROOT/wg/run
+    ln -sf /etc/wg_nested/finish $SERVICE_ROOT/wg/finish
+
+    WG1_CFG=/etc/wireguard/wg1.conf
+    cp -f /config/wg1.conf $WG1_CFG
+    sed -i 's/^DNS/#DNS/g' $WG0_CFG
+
+    # Prevent wg-quick modify routing table
+    sed -i 's/^Table/#Table/g' $WG0_CFG
+    sed -i '/^\[Interface\]/a\Table=off' $WG0_CFG
+    sed -i 's/^Table/#Table/g' $WG1_CFG
+    sed -i '/^\[Interface\]/a\Table=off' $WG1_CFG
+
+    WG0_MTU=$(grep '^MTU' $WG0_CFG | grep -oE '[0-9]+')
+    WG0_MTU=${WG0_MTU:-1420}
+    WG1_MTU=$(echo "$WG0_MTU - 80" | bc)
+    sed -i 's/^MTU/#MTU/g' $WG1_CFG
+    sed -i "/^\[Interface\]/a\MTU=$WG1_MTU" $WG1_CFG
+fi
