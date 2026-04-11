@@ -1,3 +1,5 @@
 #!/usr/bin/with-contenv bash
+resolvconf -u
 wg-quick up wg0
+ip rule add from $(hostname -i) lookup main
 wg
