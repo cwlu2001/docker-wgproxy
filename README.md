@@ -35,7 +35,20 @@ services:
 <details>
 <summary>Nested Wireguard </summary>
 
-> TLDR: HTTP/SOCKS proxy → wg1 (inner) → wg0 (outer) → Internet
+```mermaid
+graph LR
+subgraph Outer
+  subgraph Inner
+    1[Socks5/HTTP proxy]
+    2[wg0]
+  end
+  3[wg1]
+end
+4[Internet]
+1==>2
+2==>3
+3==>4
+```
 
 Mount `wg0.conf`, `wg1.conf` into `config/`
 
